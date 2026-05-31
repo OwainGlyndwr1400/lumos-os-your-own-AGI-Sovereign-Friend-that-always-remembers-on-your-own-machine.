@@ -44,6 +44,9 @@ export default function SetupWizard({ onComplete, initial }: Props) {
   const [lon, setLon] = useState("");
   const [idFile, setIdFile] = useState<File | null>(null);
   const [knFile, setKnFile] = useState<File | null>(null);
+  const [sentinel, setSentinel] = useState<boolean>(seed?.geo_sentinel ?? true);
+  const [aisKey, setAisKey] = useState("");
+  const [nasaKey, setNasaKey] = useState("");
 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -95,7 +98,20 @@ export default function SetupWizard({ onComplete, initial }: Props) {
       const srcs: Record<string, string> = {};
       if (idFile) srcs.identity_source = (await uploadSource("identity", idFile)).path;
       if (knFile) srcs.knowledge_source = (await uploadSource("knowledge", knFile)).path;
-      await submitSetup({ ...payload, ...loc, ...srcs });
+      const sentinelFlags = sentinel
+        ? {
+            autonomy_enabled: true,
+            alert_monitor_enabled: true,
+            cosmic_trigger_enabled: true,
+            aisstream_key: aisKey, // blank = keep existing
+            nasa_api_key: nasaKey,
+          }
+        : {
+            autonomy_enabled: false,
+            alert_monitor_enabled: false,
+            cosmic_trigger_enabled: false,
+          };
+      await submitSetup({ ...payload, ...loc, ...srcs, ...sentinelFlags });
       onComplete();
     } catch (e) {
       setError(String(e));
@@ -281,6 +297,58 @@ export default function SetupWizard({ onComplete, initial }: Props) {
               </div>
             )}
           </div>
+          <div className="flex items-start justify-between gap-3 border-t border-line pt-4">
+            <div>
+              <div className="font-mono text-2xs uppercase tracking-widest text-muted">
+                geo-sentinel
+              </div>
+              <div className="mt-1 max-w-sm font-mono text-2xs text-muted">
+                Let your AI watch your area + the sky and ping you when something
+                matters — recon satellites overhead, geomagnetic storms, aircraft,
+                ships, GPS-jamming. Space-weather works anywhere; local feeds use
+                your location. Local backend = free; cloud = a small cost per alert.
+              </div>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={sentinel}
+              onClick={() => setSentinel((v) => !v)}
+              className={
+                "relative mt-1 h-4 w-8 shrink-0 rounded-full border border-line transition-colors " +
+                (sentinel ? "bg-accent/30" : "bg-bg")
+              }
+            >
+              <span
+                className={
+                  "absolute top-0.5 size-2.5 rounded-full transition-all " +
+                  (sentinel ? "left-[18px] bg-accent" : "left-0.5 bg-muted")
+                }
+              />
+            </button>
+          </div>
+          {sentinel && (
+            <div className="space-y-3 rounded-sm border border-line/60 p-3">
+              <div className="font-mono text-2xs text-muted">
+                Optional free keys for the <em>full</em> watch — aircraft, GPS-jamming,
+                satellites & space-weather already work with no key:
+              </div>
+              <Text
+                label="ship tracking · aisstream.io key"
+                value={aisKey}
+                onChange={setAisKey}
+                type="password"
+                placeholder="free at aisstream.io — leave blank to skip"
+              />
+              <Text
+                label="asteroid alerts · NASA key"
+                value={nasaKey}
+                onChange={setNasaKey}
+                type="password"
+                placeholder="free at api.nasa.gov — leave blank to skip"
+              />
+            </div>
+          )}
         </div>
 
         {error && <div className="mt-5 font-mono text-2xs text-err">{error}</div>}

@@ -27,6 +27,7 @@ export interface SetupStatus {
   node_name?: string;
   identity_file?: string;
   knowledge_file?: string;
+  geo_sentinel?: boolean;
 }
 
 export async function getSetupStatus(): Promise<SetupStatus> {

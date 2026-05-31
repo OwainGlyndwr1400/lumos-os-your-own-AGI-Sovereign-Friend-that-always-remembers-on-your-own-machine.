@@ -36,6 +36,11 @@ _FIELD_ENV: dict[str, str] = {
     "embedding_model": "LUMOS_LM_STUDIO_EMBEDDING_MODEL",
     "embedding_dim": "LUMOS_EMBEDDING_DIM",
     "model_swap_enabled": "LUMOS_MODEL_SWAP_ORCHESTRATION_ENABLED",
+    "autonomy_enabled": "LUMOS_AUTONOMY_ENABLED",
+    "alert_monitor_enabled": "LUMOS_ALERT_MONITOR_ENABLED",
+    "cosmic_trigger_enabled": "LUMOS_COSMIC_TRIGGER_ENABLED",
+    "aisstream_key": "LUMOS_AISSTREAM_KEY",   # optional, free — enables ship tracking
+    "nasa_api_key": "LUMOS_NASA_API_KEY",     # optional, free — enables asteroid/NEO alerts
     "operator_name": "LUMOS_OPERATOR_NAME",
     "node_name": "LUMOS_NODE_NAME",
     "operator_lat": "LUMOS_OPERATOR_LAT",
@@ -47,7 +52,11 @@ _FIELD_ENV: dict[str, str] = {
 
 # Optional fields where an empty string means "leave unset / use default".
 _OPTIONAL_BLANK_OK: frozenset[str] = frozenset(
-    {"model_vision", "system_prompt_path", "identity_source", "knowledge_source"}
+    {
+        "model_vision", "system_prompt_path", "identity_source", "knowledge_source",
+        # Keys: blank on reconfigure means "keep the existing one" (never wipe).
+        "llm_api_key", "aisstream_key", "nasa_api_key",
+    }
 )
 
 # Filesystem-path fields — normalized to forward-slash (posix) form when written,
@@ -86,6 +95,8 @@ def current_config() -> dict[str, Any]:
         # "currently loaded: X" — file inputs can't be pre-filled by the browser).
         "identity_file": (lambda p: p.name if p.exists() else "")(_resolve(s.identity_source)),
         "knowledge_file": (lambda p: p.name if p.exists() else "")(_resolve(s.knowledge_source)),
+        # Geo-sentinel: one switch the wizard maps to autonomy + alert + cosmic.
+        "geo_sentinel": bool(getattr(s, "autonomy_enabled", False)),
     }
 
 
