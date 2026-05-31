@@ -1,0 +1,42 @@
+Lumos OS — License (Source-Available, Noncommercial, Attribution)
+
+Copyright (c) 2026 Lumos OS
+
+You are free to:
+
+  • USE & STUDY — run this software and read the source for personal,
+    educational, and other noncommercial purposes.
+  • MODIFY & FORK — change the code and build your own version for yourself.
+  • SHARE — distribute your version, as long as you keep this license file and
+    the attribution below intact.
+
+On these conditions:
+
+  1. ATTRIBUTION — you must credit "Lumos OS" and include a visible link back to
+     the original project, stating that your version was built from it
+     (e.g. "Built from Lumos OS — <link to the original repository>").
+
+  2. NONCOMMERCIAL — you may not sell this software or any derivative, and you
+     may not use it or derivatives primarily for commercial advantage or
+     monetary gain, without the author's prior written permission.
+
+  3. KEEP THIS NOTICE — any copy or fork must retain this LICENSE file and the
+     attribution in (1).
+
+NO WARRANTY — the software is provided "as is", without warranty of any kind,
+express or implied. The authors are not liable for any claim, damages, or other
+liability arising from the software or its use.
+
+---
+
+This is a SOURCE-AVAILABLE, NONCOMMERCIAL license — deliberately not an
+OSI-approved "open source" license, because it restricts commercial use. It
+encodes the same intent as, and you may treat it as equivalent to, either of
+these well-known licenses:
+
+  • Creative Commons Attribution-NonCommercial 4.0 (CC BY-NC 4.0)
+    https://creativecommons.org/licenses/by-nc/4.0/
+  • PolyForm Noncommercial 1.0.0
+    https://polyformproject.org/licenses/noncommercial/1.0.0/
+
+For commercial-use permission, contact the author.

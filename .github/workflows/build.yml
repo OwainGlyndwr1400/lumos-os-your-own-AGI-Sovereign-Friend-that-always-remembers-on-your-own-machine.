@@ -1,0 +1,68 @@
+name: build-lumos-os
+
+# Builds the Lumos OS desktop app for Windows, macOS, and Linux.
+# Run manually (Actions tab → Run workflow) or push a v* tag.
+# Each OS builds on its own runner — PyInstaller can't cross-compile.
+# Artifacts (one folder per OS) are downloadable from the run page.
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            sep: ";"
+            icon: assets/icon.ico
+            artifact: LumosOS-windows
+          - os: macos-latest
+            sep: ":"
+            icon: assets/icon.icns
+            artifact: LumosOS-macos
+          - os: ubuntu-latest
+            sep: ":"
+            icon: assets/icon-512.png
+            artifact: LumosOS-linux
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Build HUD
+        run: |
+          npm --prefix hud install
+          npm --prefix hud run build
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install package + PyInstaller
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install pyinstaller
+
+      - name: Build app
+        run: >
+          pyinstaller launch.py --name LumosOS --noconfirm --clean
+          --icon "${{ matrix.icon }}"
+          --add-data "hud/dist${{ matrix.sep }}hud/dist"
+          --add-data "data/predictions.json${{ matrix.sep }}data"
+          --collect-submodules lumos_node --collect-data lumos_node
+          --collect-all faiss --collect-all skyfield --collect-all ijson
+          --collect-submodules uvicorn --collect-submodules sse_starlette
+          --exclude-module faster_whisper --exclude-module kokoro_onnx
+          --exclude-module onnxruntime --exclude-module ctranslate2
+          --exclude-module torch --exclude-module matplotlib --exclude-module tkinter
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: dist/LumosOS
