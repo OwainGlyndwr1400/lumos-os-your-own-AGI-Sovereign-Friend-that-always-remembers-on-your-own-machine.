@@ -35,6 +35,7 @@ export default function SetupWizard({ onComplete, initial }: Props) {
   const [cloudModel, setCloudModel] = useState("gpt-4o-mini");
   const [cloudEmbed, setCloudEmbed] = useState("text-embedding-3-small");
   const [cloudDim, setCloudDim] = useState(1536);
+  const [embedLocal, setEmbedLocal] = useState(true); // cloud chat + local bge embeddings
 
   // Identity (all optional except — softly — a name)
   const [operatorName, setOperatorName] = useState(seed?.operator_name ?? "");
@@ -72,6 +73,8 @@ export default function SetupWizard({ onComplete, initial }: Props) {
               model_heavy: (modelHeavy.trim() || modelLight.trim()),
               embedding_model: embedModel.trim(),
               embedding_dim: embedDim,
+              embedding_base_url: "",
+              embedding_api_key: "",
               model_swap_enabled: true,
               operator_name: operatorName.trim(),
               node_name: nodeName.trim() || "Lumos",
@@ -82,8 +85,10 @@ export default function SetupWizard({ onComplete, initial }: Props) {
               llm_api_key: cloudKey.trim(),
               model_light: cloudModel.trim(),
               model_heavy: cloudModel.trim(),
-              embedding_model: cloudEmbed.trim(),
-              embedding_dim: cloudDim,
+              embedding_model: embedLocal ? "text-embedding-bge-large-en-v1.5" : cloudEmbed.trim(),
+              embedding_dim: embedLocal ? 1024 : cloudDim,
+              embedding_base_url: embedLocal ? "http://localhost:1234/v1" : "",
+              embedding_api_key: embedLocal ? "lm-studio" : "",
               model_swap_enabled: false,
               operator_name: operatorName.trim(),
               node_name: nodeName.trim() || "Lumos",
@@ -196,11 +201,41 @@ export default function SetupWizard({ onComplete, initial }: Props) {
               Uses a cloud provider (OpenAI shown). Easiest to start — no downloads —
               but costs a little per use and your messages go to that provider.
             </div>
-            <Text label="provider url" value={cloudBase} onChange={setCloudBase} placeholder="https://api.openai.com/v1" hint="any OpenAI-compatible endpoint" />
+            <Text label="provider url" value={cloudBase} onChange={setCloudBase} placeholder="https://api.openai.com/v1" hint="any OpenAI-compatible endpoint · Gemini: https://generativelanguage.googleapis.com/v1beta/openai/" />
             <Text label="api key" value={cloudKey} onChange={setCloudKey} placeholder="sk-…" type="password" hint="stored locally, in your config only" />
-            <Text label="chat model" value={cloudModel} onChange={setCloudModel} placeholder="gpt-4o-mini" />
-            <Text label="embedding model" value={cloudEmbed} onChange={setCloudEmbed} placeholder="text-embedding-3-small" />
-            <Num label="embedding dimension" value={cloudDim} onChange={setCloudDim} hint="OpenAI text-embedding-3-small = 1536" />
+            <Text label="chat model" value={cloudModel} onChange={setCloudModel} placeholder="gpt-4o-mini · or gemini-2.5-flash" />
+            <label className="flex items-start justify-between gap-3 pt-1">
+              <span className="font-mono text-2xs text-muted">
+                embed locally via LM Studio
+                <span className="mt-0.5 block text-muted/70">
+                  recommended — many cloud providers (e.g. Gemini) have no/flaky
+                  embeddings. Needs LM Studio running with a bge model.
+                </span>
+              </span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={embedLocal}
+                onClick={() => setEmbedLocal((v) => !v)}
+                className={
+                  "relative mt-0.5 h-4 w-8 shrink-0 rounded-full border border-line transition-colors " +
+                  (embedLocal ? "bg-accent/30" : "bg-bg")
+                }
+              >
+                <span
+                  className={
+                    "absolute top-0.5 size-2.5 rounded-full transition-all " +
+                    (embedLocal ? "left-[18px] bg-accent" : "left-0.5 bg-muted")
+                  }
+                />
+              </button>
+            </label>
+            {!embedLocal && (
+              <>
+                <Text label="embedding model" value={cloudEmbed} onChange={setCloudEmbed} placeholder="text-embedding-3-small" hint="must be supported by your provider's /embeddings" />
+                <Num label="embedding dimension" value={cloudDim} onChange={setCloudDim} hint="OpenAI text-embedding-3-small = 1536" />
+              </>
+            )}
           </div>
         )}
 

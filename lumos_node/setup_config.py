@@ -35,6 +35,8 @@ _FIELD_ENV: dict[str, str] = {
     "model_vision": "LUMOS_MODEL_VISION",
     "embedding_model": "LUMOS_LM_STUDIO_EMBEDDING_MODEL",
     "embedding_dim": "LUMOS_EMBEDDING_DIM",
+    "embedding_base_url": "LUMOS_EMBEDDING_BASE_URL",   # separate embed endpoint (cloud chat + local embed)
+    "embedding_api_key": "LUMOS_EMBEDDING_API_KEY",
     "model_swap_enabled": "LUMOS_MODEL_SWAP_ORCHESTRATION_ENABLED",
     "autonomy_enabled": "LUMOS_AUTONOMY_ENABLED",
     "alert_monitor_enabled": "LUMOS_ALERT_MONITOR_ENABLED",
@@ -55,7 +57,7 @@ _OPTIONAL_BLANK_OK: frozenset[str] = frozenset(
     {
         "model_vision", "system_prompt_path", "identity_source", "knowledge_source",
         # Keys: blank on reconfigure means "keep the existing one" (never wipe).
-        "llm_api_key", "aisstream_key", "nasa_api_key",
+        "llm_api_key", "aisstream_key", "nasa_api_key", "embedding_api_key",
     }
 )
 

@@ -49,9 +49,16 @@ class LMStudioClient:
     async def embed(self, texts: list[str], model: str) -> list[list[float]]:
         if not texts:
             return []
+        # Embeddings may use a SEPARATE endpoint from chat: if LUMOS_EMBEDDING_BASE_URL
+        # is set (e.g. cloud chat + local bge), route there; else use this client's
+        # endpoint. This makes every embed call route correctly without per-call-site
+        # changes.
+        s = get_settings()
+        base = (s.embedding_base_url or self.base_url).rstrip("/")
+        key = s.embedding_api_key or self.api_key
         resp = await self._client.post(
-            f"{self.base_url}/embeddings",
-            headers={"Authorization": f"Bearer {self.api_key}"},
+            f"{base}/embeddings",
+            headers={"Authorization": f"Bearer {key}"},
             json={"model": model, "input": texts},
         )
         resp.raise_for_status()

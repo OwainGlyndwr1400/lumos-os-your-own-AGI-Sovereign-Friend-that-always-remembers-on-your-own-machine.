@@ -26,6 +26,12 @@ class Settings(BaseSettings):
 
     lm_studio_embedding_model: str = "text-embedding-bge-large-en-v1.5"
     embedding_dim: int = 1024
+    # Optional SEPARATE endpoint for embeddings. Cloud chat providers (Gemini,
+    # OpenRouter, …) often have no or a flaky /embeddings endpoint — point this at
+    # local LM Studio + bge so chat runs in the cloud while embeddings stay local
+    # and free. Empty = use the chat endpoint (lm_studio_base_url / _api_key).
+    embedding_base_url: str = ""
+    embedding_api_key: str = ""
     embedding_batch_size: int = Field(default=128, ge=1, le=1024)
     embedding_concurrency: int = Field(default=4, ge=1, le=32)
 
